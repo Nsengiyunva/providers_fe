@@ -18,10 +18,12 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       
       login: async (email: string, password: string) => {
+
+        console.log( password )
         // API call would go here
         const mockUser = { id: '1', email, name: 'John Doe' };
         const mockToken = 'mock-token-123';
-        set({ user: mockUser, token: mockToken, isAuthenticated: true, password });
+        set({ user: mockUser, token: mockToken, isAuthenticated: true });
       },
       
       logout: () => {
