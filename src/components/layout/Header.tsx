@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { 
   Menu, 
-  Search, 
+  // Search, 
   User, 
   Heart, 
   MapPin,
@@ -12,7 +12,7 @@ import {
 import { useAuthStore, useFavoritesStore } from '../../store';
 
 const Header = () => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const favorites = useFavoritesStore(state => state.favorites);
 
   return (

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ServiceProvider } from '../types';
+// import { ServiceProvider } from '../types';
 
 interface AuthStore {
   user: any | null;
@@ -21,7 +21,7 @@ export const useAuthStore = create<AuthStore>()(
         // API call would go here
         const mockUser = { id: '1', email, name: 'John Doe' };
         const mockToken = 'mock-token-123';
-        set({ user: mockUser, token: mockToken, isAuthenticated: true });
+        set({ user: mockUser, token: mockToken, isAuthenticated: true, password });
       },
       
       logout: () => {
