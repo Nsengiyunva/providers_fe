@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// API base URL - points to API Gateway
 const API_BASE_URL = 'http://localhost:3000';
 
 const api = axios.create({
