@@ -1,8 +1,8 @@
 # EventHub Frontend
 
-Modern React frontend for the EventHub events service platform, styled with a professional outdoor/e-commerce theme.
+Modern React frontend for the EventHub events service platform, styled with a professional outdoor/e-commerce theme. **Fully integrated with EventHub backend microservices.**
 
-## Features
+## 🎯 Features
 
 ### 🎨 Design
 - **Dark Header** with red accents (inspired by outdoor e-commerce sites)
@@ -10,12 +10,22 @@ Modern React frontend for the EventHub events service platform, styled with a pr
 - **Responsive Design** works on all devices
 - **Professional Theme** with gray backgrounds and bold CTAs
 
-### ⚡ Functionality
-- **Browse Providers** by category, location, price, rating
-- **Provider Profiles** with gallery, reviews, and booking forms
-- **Favorites System** save providers you like
-- **Real-time Search** find providers instantly
-- **Booking Inquiries** contact providers directly
+### ⚡ Backend Integration
+- ✅ **User Authentication** (Register, Login, Logout)
+- ✅ **Browse Providers** with real-time filtering
+- ✅ **Provider Profiles** loaded from API
+- ✅ **Booking Inquiries** sent to backend
+- ✅ **Reviews System** fetched from database
+- ✅ **JWT Authentication** with token management
+- ✅ **State Persistence** with localStorage
+
+### 🔌 Connected API Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login with JWT
+- `GET /api/profiles` - Browse providers with filters
+- `GET /api/profiles/:id` - Provider details
+- `POST /api/inquiries` - Send booking inquiry
+- `GET /api/reviews` - Fetch provider reviews
 
 ### 🛠️ Tech Stack
 - **React 18** with TypeScript
@@ -24,12 +34,13 @@ Modern React frontend for the EventHub events service platform, styled with a pr
 - **Zustand** for state management
 - **React Router** for navigation
 - **Axios** for API calls
+- **React Hot Toast** for notifications
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+
-- npm or yarn
+- EventHub backend running on port 3000
 
 ### Installation
 
@@ -37,15 +48,320 @@ Modern React frontend for the EventHub events service platform, styled with a pr
 # Install dependencies
 npm install
 
+# Copy environment file
+cp .env.example .env
+
 # Start development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
+
+Frontend will be available at: **http://localhost:5173**
+
+### Backend Connection
+
+Make sure EventHub backend is running:
+
+```bash
+# Check backend health
+curl http://localhost:3000/health
+
+# Should return: {"status":"healthy"}
+```
+
+See **[SETUP.md](./SETUP.md)** for detailed backend integration guide.
+
+## 📋 Pages & Features
+
+### 🏠 Home Page (`/`)
+- Hero section with gradient
+- Popular categories grid
+- Featured providers (fetched from API)
+- How it works section
+- Provider CTA
+
+### 🔍 Browse Page (`/browse`)
+- **Filters**: Category, Location, Price, Rating
+- Grid layout with provider cards
+- Real-time API data loading
+- Empty states and loading indicators
+
+### 👤 Provider Detail (`/provider/:id`)
+- Profile loaded from API
+- Image gallery
+- Reviews from database
+- **Booking Form** (sends to `/api/inquiries`)
+  - Full name, email, phone
+  - Event date, type, location
+  - Number of guests
+  - Message
+- Contact information
+
+### 🔐 Login Page (`/login`)
+- Email/password authentication
+- Remember me checkbox
+- Forgot password link
+- Error handling with toast
+
+### ✍️ Register Page (`/register`)
+- Guest vs Service Provider selection
+- Form validation
+- Password strength requirements
+- Terms acceptance
+- Connects to `/api/auth/register`
+
+## 🔌 API Integration
+
+### Authentication
+
+```typescript
+import { useAuthStore } from './store';
+
+const { login, register, logout, isAuthenticated, user } = useAuthStore();
+
+// Register
+await register({
+  email: 'user@example.com',
+  password: 'SecurePass123!',
+  firstName: 'John',
+  lastName: 'Doe',
+  role: 'GUEST'
+});
+
+// Login
+await login('user@example.com', 'SecurePass123!');
+
+// Check auth status
+if (isAuthenticated) {
+  console.log('Logged in as:', user.email);
+}
+```
+
+### Fetching Providers
+
+```typescript
+import { profileAPI } from './services/api';
+
+// Get all providers
+const response = await profileAPI.getProfiles();
+
+// Filter providers
+const filtered = await profileAPI.getProfiles({
+  category: 'Photography',
+  location: 'New York',
+  minRating: 4.5
+});
+
+// Get provider details
+const provider = await profileAPI.getProfileById('provider-id');
+```
+
+### Sending Inquiries
+
+```typescript
+import { inquiryAPI } from './services/api';
+
+await inquiryAPI.createInquiry({
+  providerId: 'provider-id',
+  eventType: 'Wedding',
+  eventDate: '2024-06-15',
+  eventLocation: 'New York, NY',
+  numberOfGuests: 150,
+  message: 'Looking for photography services...',
+  contactInfo: {
+    name: 'John Doe',
+    email: 'john@example.com',
+    phone: '+1-234-567-8900'
+  }
+});
+```
+
+## 🎨 Styling Theme
+
+### Colors
+```css
+Primary Red: #ed1515 (buttons, links, accents)
+Dark Header: #3d3d3d (navigation background)
+Light Background: #f9fafb (page background)
+White Cards: #ffffff (content cards)
+```
+
+### Components
+- **Cards**: White background, rounded corners, subtle shadow
+- **Buttons**: Bold red, rounded, uppercase text
+- **Inputs**: Gray border, focus ring on interaction
+- **Badges**: Small pills with background color
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create `.env` file:
+
+```env
+VITE_API_URL=http://localhost:3000
+VITE_APP_NAME=EventHub
+```
+
+### CORS Setup
+
+Add to your API Gateway (`services/api-gateway/src/index.ts`):
+
+```typescript
+import cors from 'cors';
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
+```
+
+## 📦 Build & Deploy
+
+### Production Build
+
+```bash
+npm run build
+```
+
+Output in `dist/` directory.
+
+### Deploy
+
+**Vercel:**
+```bash
+vercel
+```
+
+**Netlify:**
+```bash
+netlify deploy
+```
+
+**Docker:**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+RUN npm install -g serve
+EXPOSE 3000
+CMD ["serve", "-s", "dist", "-l", "3000"]
+```
+
+## 🧪 Testing Integration
+
+### 1. Test Registration
+```bash
+# Open http://localhost:5173/register
+# Fill form and submit
+# Check backend logs for USER_CREATED event
+```
+
+### 2. Test Login
+```bash
+# Open http://localhost:5173/login
+# Login with registered credentials
+# Token should be stored in localStorage
+```
+
+### 3. Test Browse
+```bash
+# Open http://localhost:5173/browse
+# Providers should load from API
+# Try filtering by category
+```
+
+### 4. Test Booking
+```bash
+# Open any provider detail page
+# Fill booking form
+# Submit inquiry
+# Check backend for INQUIRY_CREATED event
+```
+
+## 🐛 Troubleshooting
+
+### CORS Errors
+Add CORS middleware to API Gateway (see Configuration above)
+
+### Connection Refused
+Verify backend is running: `curl http://localhost:3000/health`
+
+### 401 Unauthorized
+Check if token is valid, try logging in again
+
+### No Providers Showing
+1. Check Profile Service is running
+2. Seed database with sample data
+3. Check browser console for errors
+
+See **[SETUP.md](./SETUP.md)** for detailed troubleshooting.
+
+## 📁 Project Structure
+
+```
+eventhub-frontend/
+├── src/
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── Header.tsx          # Navigation with auth state
+│   │   │   └── Footer.tsx          
+│   │   └── ProviderCard.tsx        # Provider display card
+│   ├── pages/
+│   │   ├── HomePage.tsx            # Landing page
+│   │   ├── BrowsePage.tsx          # Browse with API filters
+│   │   ├── ProviderDetailPage.tsx  # Details + booking form
+│   │   ├── LoginPage.tsx           # Authentication
+│   │   └── RegisterPage.tsx        # User registration
+│   ├── services/
+│   │   └── api.ts                  # Axios API client + endpoints
+│   ├── store/
+│   │   └── index.ts                # Zustand stores (auth, favorites)
+│   ├── types/
+│   │   └── index.ts                # TypeScript interfaces
+│   ├── App.tsx                     # Main app with routing
+│   └── main.tsx                    # Entry point
+├── .env                            # Environment variables
+├── SETUP.md                        # Backend integration guide
+└── README.md                       # This file
+```
+
+## 🔐 Security
+
+- ✅ JWT tokens stored in localStorage
+- ✅ Tokens sent in Authorization header
+- ✅ Automatic logout on 401 responses
+- ✅ Password validation (8+ chars, uppercase, number, special)
+- ⚠️ Use HTTPS in production
+- ⚠️ Implement refresh token rotation
+- ⚠️ Add rate limiting
+
+## 📚 Documentation
+
+- **Setup Guide**: [SETUP.md](./SETUP.md)
+- **Backend Repo**: eventhub-backend/
+- **API Docs**: http://localhost:3000/api-docs (if implemented)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Test with backend
+5. Submit pull request
+
+## 📄 License
+
+MIT License
+
+---
+
+Built with ❤️ using React + TypeScript + Tailwind CSS
+
+**Backend:** Node.js microservices with Kafka, Redis, PostgreSQL
+**Frontend:** Modern React SPA with full API integration
 
 ## Project Structure
 

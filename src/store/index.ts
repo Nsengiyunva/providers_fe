@@ -1,12 +1,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-// import { ServiceProvider } from '../types';
+import { authAPI } from '../services/api';
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'GUEST' | 'SERVICE_PROVIDER' | 'ADMIN';
+}
 
 interface AuthStore {
-  user: any | null;
+  user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  register: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role: 'GUEST' | 'SERVICE_PROVIDER';
+  }) => Promise<void>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -18,16 +33,40 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       
       login: async (email: string, password: string) => {
+        try {
+          const response = await authAPI.login({ email, password });
+          const { user, tokens } = response.data.data;
+          set({ 
+            user, 
+            token: tokens.accessToken, 
+            isAuthenticated: true 
+          });
+        } catch (error) {
+          console.error('Login failed:', error);
+          throw error;
+        }
+      },
 
-        console.log( password )
-        // API call would go here
-        const mockUser = { id: '1', email, name: 'John Doe' };
-        const mockToken = 'mock-token-123';
-        set({ user: mockUser, token: mockToken, isAuthenticated: true });
+      register: async (data) => {
+        try {
+          const response = await authAPI.register(data);
+          // After registration, user needs to verify email
+          // Don't auto-login, show success message instead
+          return response.data;
+        } catch (error) {
+          console.error('Registration failed:', error);
+          throw error;
+        }
       },
       
-      logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
+      logout: async () => {
+        try {
+          await authAPI.logout();
+        } catch (error) {
+          console.error('Logout failed:', error);
+        } finally {
+          set({ user: null, token: null, isAuthenticated: false });
+        }
       },
     }),
     {
