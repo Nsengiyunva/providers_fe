@@ -26,7 +26,7 @@ const ProviderCard = ({ provider }: ProviderCardProps) => {
         },
       });
     } else {
-      addFavorite(provider);
+      addFavorite(provider.id);
       toast.success('Added to favorites', {
         icon: '❤️',
         style: {
